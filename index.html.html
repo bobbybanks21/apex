@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX — No Wasted Reps. No Wasted Hours.</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --midnight: #0A0A18;
+    --navy: #0D0D1F;
+    --navy2: #12122A;
+    --purple: #534AB7;
+    --purple-light: #7F77DD;
+    --teal: #1D9E75;
+    --teal-light: #5DCAA5;
+    --chalk: #F0EFE8;
+    --muted: #6666AA;
+    --dimmed: #333355;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--midnight);
+    color: var(--chalk);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.2s;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--purple);
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s ease;
+    opacity: 0.5;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 0.5px solid rgba(83,74,183,0.15);
+    background: rgba(10,10,24,0.7);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--chalk);
+    text-decoration: none;
+  }
+
+  .nav-tag {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 8rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  /* Animated background orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.12;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 500px; height: 500px; background: var(--purple); top: -100px; left: -150px; animation-delay: 0s; }
+  .orb-2 { width: 400px; height: 400px; background: var(--teal); bottom: -100px; right: -100px; animation-delay: -4s; }
+  .orb-3 { width: 300px; height: 300px; background: var(--purple-light); top: 40%; left: 60%; animation-delay: -8s; }
+
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(40px, 30px) scale(1.05); }
+  }
+
+  /* Grid lines background */
+  .grid-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(83,74,183,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(83,74,183,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--purple-light);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-triangle {
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.3s;
+  }
+
+  .hero-wordmark {
+    font-size: clamp(5rem, 15vw, 11rem);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 0.9;
+    color: var(--chalk);
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero-rule {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem auto;
+    width: 320px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.55s;
+  }
+  .hero-rule-line { flex: 1; height: 0.5px; background: var(--dimmed); }
+  .hero-rule-pill { width: 48px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--purple), var(--teal)); }
+
+  .hero-tagline {
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.65s;
+  }
+
+  .hero-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    color: rgba(240,239,232,0.6);
+    max-width: 560px;
+    line-height: 1.5;
+    margin: 0 auto 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.75s;
+  }
+
+  /* Waitlist form */
+  .waitlist-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    border: 0.5px solid rgba(83,74,183,0.4);
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.9s;
+    position: relative;
+    z-index: 2;
+  }
+
+  .waitlist-form input {
+    flex: 1;
+    background: rgba(13,13,31,0.9);
+    border: none;
+    outline: none;
+    padding: 1rem 1.25rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--chalk);
+  }
+
+  .waitlist-form input::placeholder { color: var(--dimmed); }
+
+  .waitlist-form button {
+    background: linear-gradient(90deg, var(--purple), var(--teal));
+    border: none;
+    padding: 1rem 1.75rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--chalk);
+    cursor: none;
+    transition: opacity 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .waitlist-form button:hover { opacity: 0.88; }
+  .waitlist-form button:active { transform: scale(0.98); }
+
+  .waitlist-count {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--dimmed);
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.05s;
+  }
+
+  .waitlist-count span { color: var(--teal-light); }
+
+  /* Success state */
+  .success-msg {
+    display: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--teal-light);
+    padding: 1rem;
+    border: 0.5px solid var(--teal);
+    border-radius: 6px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.3s;
+  }
+  .scroll-hint span { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--dimmed); }
+  .scroll-line { width: 0.5px; height: 40px; background: linear-gradient(var(--dimmed), transparent); animation: scrollPulse 2s ease infinite; }
+  @keyframes scrollPulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  /* Products section */
+  .section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--purple-light);
+    margin-bottom: 1rem;
+  }
+
+  .section-heading {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .section-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: rgba(240,239,232,0.5);
+    margin-bottom: 3rem;
+    max-width: 480px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: rgba(83,74,183,0.15);
+    border: 0.5px solid rgba(83,74,183,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .product-card {
+    background: var(--navy);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .product-card.focus::before { background: linear-gradient(90deg, var(--purple), transparent); }
+  .product-card.restore::before { background: linear-gradient(90deg, var(--teal), transparent); }
+
+  .product-card:hover { background: var(--navy2); }
+
+  .product-type {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.75rem;
+  }
+  .focus .product-type { color: var(--purple-light); }
+  .restore .product-type { color: var(--teal-light); }
+
+  .product-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .product-desc {
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .ingredient-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+
+  .ingredient {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 0.5px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  .ingredient-name { color: rgba(240,239,232,0.7); }
+  .ingredient-dose { font-size: 0.7rem; color: var(--dimmed); }
+
+  .product-price {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .focus .product-price { color: var(--purple-light); }
+  .restore .product-price { color: var(--teal-light); }
+
+  /* Why section */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(83,74,183,0.1);
+    border: 0.5px solid rgba(83,74,183,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 3rem;
+  }
+
+  .why-card {
+    background: var(--navy);
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+  .why-card:hover { background: var(--navy2); }
+
+  .why-number {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, var(--purple-light), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .why-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .why-desc {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* Bottom CTA */
+  .bottom-cta {
+    text-align: center;
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bottom-cta::before {
+    content: 'APEX';
+    position: absolute;
+    font-size: clamp(8rem, 20vw, 18rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: rgba(83,74,183,0.04);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .cta-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: var(--purple-light);
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-heading {
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .cta-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: rgba(240,239,232,0.4);
+    margin-bottom: 2.5rem;
+  }
+
+  .cta-form {
+    display: flex;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    border: 0.5px solid rgba(83,74,183,0.4);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+  }
+
+  .cta-form input {
+    flex: 1;
+    background: rgba(13,13,31,0.9);
+    border: none;
+    outline: none;
+    padding: 1rem 1.25rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--chalk);
+  }
+  .cta-form input::placeholder { color: var(--dimmed); }
+
+  .cta-form button {
+    background: linear-gradient(90deg, var(--purple), var(--teal));
+    border: none;
+    padding: 1rem 1.75rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--chalk);
+    cursor: none;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .cta-form button:hover { opacity: 0.88; }
+
+  .cta-note {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--dimmed);
+    margin-top: 1rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 0.5px solid rgba(83,74,183,0.15);
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo { font-size: 1rem; font-weight: 700; letter-spacing: 0.2em; color: var(--chalk); }
+
+  .footer-links { display: flex; gap: 2rem; }
+  .footer-links a {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--dimmed);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--chalk); }
+
+  .footer-ig {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+  }
+
+  /* Trust badges */
+  .badges {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.15s;
+  }
+
+  .badge {
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    border: 0.5px solid var(--dimmed);
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    background: rgba(83,74,183,0.05);
+  }
+
+  /* Divider */
+  .divider {
+    height: 0.5px;
+    background: linear-gradient(90deg, transparent, rgba(83,74,183,0.3), transparent);
+    margin: 0 3rem;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    .products-grid { grid-template-columns: 1fr; }
+    .why-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .footer-links { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<nav>
+  <a class="nav-logo" href="#">APEX</a>
+  <span class="nav-tag">@THEAPEXSTACK</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-lines"></div>
+
+  <p class="hero-eyebrow">LAUNCHING 2026</p>
+
+  <div class="hero-triangle">
+    <svg width="44" height="32" viewBox="0 0 44 32">
+      <defs>
+        <linearGradient id="tg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#534AB7"/>
+          <stop offset="100%" stop-color="#1D9E75"/>
+        </linearGradient>
+      </defs>
+      <polygon points="22,2 42,30 2,30" fill="none" stroke="url(#tg)" stroke-width="1.5" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <h1 class="hero-wordmark">APEX</h1>
+
+  <div class="hero-rule">
+    <div class="hero-rule-line"></div>
+    <div class="hero-rule-pill"></div>
+    <div class="hero-rule-line"></div>
+  </div>
+
+  <p class="hero-tagline">NO WASTED REPS. NO WASTED HOURS.</p>
+
+  <p class="hero-sub">The first supplement stack built for student athletes who refuse to choose between the session and the lecture.</p>
+
+  <div class="waitlist-form" id="hero-form">
+    <input type="email" id="hero-email" placeholder="your@university.ac.uk" autocomplete="off"/>
+    <button onclick="joinWaitlist('hero')">JOIN WAITLIST</button>
+  </div>
+  <div class="success-msg" id="hero-success">✓ You're on the list. We'll be in touch before launch.</div>
+
+  <div class="badges">
+    <span class="badge">WADA COMPLIANT</span>
+    <span class="badge">LAB TESTED</span>
+    <span class="badge">NO FILLERS</span>
+    <span class="badge">FULL LABEL DISCLOSURE</span>
+    <span class="badge">MADE IN UK</span>
+  </div>
+
+  <p class="waitlist-count"><span id="count">247</span> STUDENT ATHLETES ALREADY ON THE LIST</p>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PRODUCTS -->
+<section class="section">
+  <p class="section-label">THE STACK</p>
+  <h2 class="section-heading">TWO PRODUCTS.<br>ONE SYSTEM.</h2>
+  <p class="section-sub">Body and brain. Training and studying. Everything you need, nothing you don't.</p>
+
+  <div class="products-grid">
+    <div class="product-card focus">
+      <p class="product-type">PRE-WORKOUT</p>
+      <h3 class="product-name">FOCUS</h3>
+      <p class="product-desc">ENERGY + CLARITY. NO CRASH.</p>
+      <div class="ingredient-list">
+        <div class="ingredient"><span class="ingredient-name">Lion's Mane Extract</span><span class="ingredient-dose">500mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">L-Theanine</span><span class="ingredient-dose">200mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">Creatine Monohydrate</span><span class="ingredient-dose">3g</span></div>
+        <div class="ingredient"><span class="ingredient-name">Natural Caffeine</span><span class="ingredient-dose">150mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">L-Citrulline</span><span class="ingredient-dose">3g</span></div>
+      </div>
+      <p class="product-price">£39.99</p>
+    </div>
+    <div class="product-card restore">
+      <p class="product-type">NIGHT RECOVERY</p>
+      <h3 class="product-name">RESTORE</h3>
+      <p class="product-desc">SLEEP DEEP. RECOVER FULLY.</p>
+      <div class="ingredient-list">
+        <div class="ingredient"><span class="ingredient-name">Ashwagandha KSM-66</span><span class="ingredient-dose">600mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">Magnesium Glycinate</span><span class="ingredient-dose">300mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">Tart Cherry Extract</span><span class="ingredient-dose">480mg</span></div>
+        <div class="ingredient"><span class="ingredient-name">L-Glycine</span><span class="ingredient-dose">2g</span></div>
+        <div class="ingredient"><span class="ingredient-name">Zinc</span><span class="ingredient-dose">10mg</span></div>
+      </div>
+      <p class="product-price">£34.99</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHY -->
+<section class="section">
+  <p class="section-label">WHY APEX</p>
+  <h2 class="section-heading">BUILT DIFFERENT.<br>FOR A REASON.</h2>
+
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-number">01</div>
+      <p class="why-title">DUAL PERFORMANCE</p>
+      <p class="why-desc">The only stack targeting cognitive and physical performance simultaneously. Your brain needs fuel on game day too.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-number">02</div>
+      <p class="why-title">FULL TRANSPARENCY</p>
+      <p class="why-desc">No proprietary blends. No hidden doses. Every ingredient listed. Every batch third-party tested. QR code links to your lab report.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-number">03</div>
+      <p class="why-title">WADA COMPLIANT</p>
+      <p class="why-desc">You compete. We know that. Every formula is designed to keep you clean and protected, whatever level you play at.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-number">04</div>
+      <p class="why-title">SCIENCE FIRST</p>
+      <p class="why-desc">Ingredients dosed to the research, not the budget. If it doesn't work in clinical studies, it doesn't make it in.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-number">05</div>
+      <p class="why-title">MADE IN THE UK</p>
+      <p class="why-desc">Manufactured by a UK-certified lab. Regulated, quality-controlled, and delivered to your door.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-number">06</div>
+      <p class="why-title">FOR YOUR LIFE</p>
+      <p class="why-desc">Not for bodybuilders. Not for weekend warriors. For the student athlete who's competing everywhere, all the time.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BOTTOM CTA -->
+<div class="bottom-cta">
+  <p class="cta-label">EARLY ACCESS</p>
+  <h2 class="cta-heading">BE FIRST<br>IN LINE.</h2>
+  <p class="cta-sub">Join the waitlist. Get launch pricing. No spam, ever.</p>
+
+  <div class="cta-form" id="cta-form">
+    <input type="email" id="cta-email" placeholder="your@university.ac.uk" autocomplete="off"/>
+    <button onclick="joinWaitlist('cta')">JOIN WAITLIST</button>
+  </div>
+  <div class="success-msg" id="cta-success">✓ You're on the list. We'll be in touch before launch.</div>
+
+  <p class="cta-note">No spam. Unsubscribe anytime. Launch discount guaranteed for early signups.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">APEX</span>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">TikTok</a>
+    <a href="mailto:hello@theapexstack.com">Contact</a>
+  </div>
+  <span class="footer-ig">@THEAPEXSTACK</span>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 5 + 'px';
+    cursor.style.top = my - 5 + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx - 18 + 'px';
+    ring.style.top = ry - 18 + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // Waitlist count animation
+  let count = 247;
+  function joinWaitlist(source) {
+    const emailEl = document.getElementById(source === 'hero' ? 'hero-email' : 'cta-email');
+    const formEl = document.getElementById(source === 'hero' ? 'hero-form' : 'cta-form');
+    const successEl = document.getElementById(source === 'hero' ? 'hero-success' : 'cta-success');
+    const email = emailEl.value.trim();
+
+    if (!email || !email.includes('@')) {
+      emailEl.style.borderRight = '2px solid #534AB7';
+      emailEl.focus();
+      return;
+    }
+
+    formEl.style.display = 'none';
+    successEl.style.display = 'block';
+
+    count++;
+    document.getElementById('count').textContent = count;
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.product-card, .why-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease, background 0.3s';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
