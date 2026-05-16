@@ -653,10 +653,10 @@
 
   <p class="hero-sub">The first supplement stack built for student athletes who refuse to choose between the session and the lecture.</p>
 
-  <div class="waitlist-form" id="hero-form">
-    <input type="email" id="hero-email" placeholder="your@university.ac.uk" autocomplete="off"/>
-    <button onclick="joinWaitlist('hero')">JOIN WAITLIST</button>
-  </div>
+  <form class="waitlist-form" id="hero-form" action="https://formspree.io/f/mnjweyqo" method="POST" onsubmit="handleSubmit(event,'hero')">
+    <input type="email" name="email" id="hero-email" placeholder="your@university.ac.uk" autocomplete="off" required/>
+    <button type="submit">JOIN WAITLIST</button>
+  </form>
   <div class="success-msg" id="hero-success">✓ You're on the list. We'll be in touch before launch.</div>
 
   <div class="badges">
@@ -762,10 +762,10 @@
   <h2 class="cta-heading">BE FIRST<br>IN LINE.</h2>
   <p class="cta-sub">Join the waitlist. Get launch pricing. No spam, ever.</p>
 
-  <div class="cta-form" id="cta-form">
-    <input type="email" id="cta-email" placeholder="your@university.ac.uk" autocomplete="off"/>
-    <button onclick="joinWaitlist('cta')">JOIN WAITLIST</button>
-  </div>
+  <form class="cta-form" id="cta-form" action="https://formspree.io/f/mnjweyqo" method="POST" onsubmit="handleSubmit(event,'cta')">
+    <input type="email" name="email" id="cta-email" placeholder="your@university.ac.uk" autocomplete="off" required/>
+    <button type="submit">JOIN WAITLIST</button>
+  </form>
   <div class="success-msg" id="cta-success">✓ You're on the list. We'll be in touch before launch.</div>
 
   <p class="cta-note">No spam. Unsubscribe anytime. Launch discount guaranteed for early signups.</p>
@@ -803,25 +803,30 @@
   }
   animateRing();
 
-  // Waitlist count animation
   let count = 247;
-  function joinWaitlist(source) {
-    const emailEl = document.getElementById(source === 'hero' ? 'hero-email' : 'cta-email');
+  async function handleSubmit(e, source) {
+    e.preventDefault();
     const formEl = document.getElementById(source === 'hero' ? 'hero-form' : 'cta-form');
     const successEl = document.getElementById(source === 'hero' ? 'hero-success' : 'cta-success');
-    const email = emailEl.value.trim();
+    const emailEl = document.getElementById(source === 'hero' ? 'hero-email' : 'cta-email');
 
-    if (!email || !email.includes('@')) {
-      emailEl.style.borderRight = '2px solid #534AB7';
-      emailEl.focus();
-      return;
+    try {
+      const res = await fetch('https://formspree.io/f/mnjweyqo', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(formEl)
+      });
+      if (res.ok) {
+        formEl.style.display = 'none';
+        successEl.style.display = 'block';
+        count++;
+        document.getElementById('count').textContent = count;
+      } else {
+        emailEl.placeholder = 'Something went wrong — try again';
+      }
+    } catch {
+      emailEl.placeholder = 'Something went wrong — try again';
     }
-
-    formEl.style.display = 'none';
-    successEl.style.display = 'block';
-
-    count++;
-    document.getElementById('count').textContent = count;
   }
 
   // Scroll reveal
@@ -843,3 +848,4 @@
 </script>
 </body>
 </html>
+
